@@ -8,7 +8,7 @@ services:
     env_file:
       - ./.env
   web:
-    image: goldenlion52rus/gates
+    image: goldenlion52rus/yamdb
     restart: always
     volumes:
       - static_value:/app/static/
