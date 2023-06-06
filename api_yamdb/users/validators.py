@@ -3,12 +3,13 @@ import re
 from django.core.exceptions import ValidationError
 
 
-def username_validation(value):
-    if value.lower() == "me":
+def validate_username_not_me(value):
+    """Проверка, чтоб 'username' не было присвоено 'me' """
+    if value.lower() == 'me':
         raise ValidationError(
-            "Вы не можете использовать 'me' в качестве username"
+            'Выберите другое обозначение для username'
         )
     if not re.match(r'[\w.@+-]+\Z', value):
         raise ValidationError(
-            'В имени пользователя недопустимые символы'
+            'Выбранные символы не подходят для username'
         )
