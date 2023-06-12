@@ -1,5 +1,6 @@
-from rest_framework import exceptions, serializers
-from reviews.models import Category, Comment, Genre, Review, Title
+from rest_framework import serializers, exceptions
+
+from reviews.models import Category, Genre, Title, Review, Comment
 from users.models import User
 from users.validators import username_validation
 
@@ -62,7 +63,7 @@ class SignupSerializer(serializers.ModelSerializer):
             if User.objects.filter(username=data.get('username')).exists():
                 raise exceptions.ValidationError(
                     'Пользователь с таким именем уже зарегистрирован')
-            if User.objects.filter(email=data.get('email')).exists():
+            elif User.objects.filter(email=data.get('email')).exists():
                 raise exceptions.ValidationError(
                     'Данный email уже используется')
 

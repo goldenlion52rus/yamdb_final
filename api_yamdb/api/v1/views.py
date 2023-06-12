@@ -1,26 +1,39 @@
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.db.models import Avg
-from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
+from django.http import HttpResponseBadRequest
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, status, views, viewsets
-from rest_framework.decorators import action
-from rest_framework.filters import SearchFilter
-from rest_framework.permissions import (AllowAny, IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+
+from rest_framework import filters, viewsets, mixins, status, views
+from rest_framework.permissions import (
+    IsAuthenticated,
+    AllowAny,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Comment, Genre, Review, Title
-from users.models import User
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
 
+from reviews.models import Category, Genre, Title
+from users.models import User
 from .filters import TitlesFilter
-from .permissions import (IsAdminOnly, IsAdminOrReadOnly,
-                          IsAuthorModeratorAdminOrReadOnly)
-from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, GetTitleSerializer,
-                          ReviewSerializer, SignupSerializer, TitleSerializer,
-                          TokenSerializer, UserSerializer)
+from .serializers import (
+    UserSerializer,
+    SignupSerializer,
+    TokenSerializer,
+    CategorySerializer,
+    TitleSerializer,
+    GetTitleSerializer,
+    GenreSerializer, ReviewSerializer, CommentSerializer
+)
+from .permissions import (
+    IsAdminOrReadOnly,
+    IsAuthorModeratorAdminOrReadOnly,
+    IsAdminOnly
+)
+from reviews.models import Review, Comment
 
 
 class ListCreateDestroyViewSet(
@@ -72,13 +85,13 @@ class SignupView(views.APIView):
                 email=email
             )
             confirmation_code = default_token_generator.make_token(user)
-            email_message = (
+            EMAIL_MESSAGE = (
                 f'Привет, {user.username}!'
                 f'Твой код подтверждения: {confirmation_code}'
             )
             send_mail(
                 subject='Confirmation code for YaMDb',
-                message=email_message,
+                message=EMAIL_MESSAGE,
                 from_email=None,
                 recipient_list=[user.email],
                 fail_silently=False,

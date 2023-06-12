@@ -1,80 +1,78 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from users.validators import validate_username_not_me
+from .validators import username_validation
 
 
-class ReviewUser(AbstractUser):
-    """Кастомный User с распределенными правами по ролям"""
-    USERNAME_FIELD = 'username'
-    EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = ['email']
+class User(AbstractUser):
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
 
-    USER_ROLE = 'user'
-    MODERATOR_ROLE = 'moderator'
-    ADMIN_ROLE = 'admin'
-
-    ROLE_CHOICES = (
-        (USER_ROLE, 'user'),
-        (MODERATOR_ROLE, 'moderator'),
-        (ADMIN_ROLE, 'admin'),
+    ROLE_CHOICE = (
+        (USER, 'User'),
+        (MODERATOR, 'Moderator'),
+        (ADMIN, 'Admin'),
     )
 
     username = models.CharField(
         max_length=150,
         unique=True,
-        validators=[validate_username_not_me],
-        verbose_name='Имя пользователя',
-        help_text='Как к Вам обращаться?'
+        blank=False,
+        null=False,
+        validators=[username_validation]
     )
 
     email = models.EmailField(
         max_length=254,
         unique=True,
-        verbose_name='адрес электронной почты',
-        help_text='Введите адрес электронной почты'
+        blank=False,
+        null=False
     )
+
     role = models.CharField(
-        choices=ROLE_CHOICES,
-        max_length=50,
+        max_length=20,
+        choices=ROLE_CHOICE,
         default='user',
-        verbose_name='Роль пользователя',
-        help_text='Выберите из списка роль для пользователя'
+        blank=True
     )
 
     bio = models.TextField(
-        max_length=250,
-        blank=True,
-        verbose_name='Роль пользователя',
-        help_text='Выберите из списка роль для пользователя'
+        blank=True
     )
 
     first_name = models.CharField(
         max_length=150,
-        blank=True,
-        verbose_name='Имя пользователя',
-        help_text='Введите имя пользователя'
+        blank=True
     )
 
     last_name = models.CharField(
         max_length=150,
-        blank=True,
-        verbose_name='Фамилия пользователя',
-        help_text='Введите Вашу фамилию'
+        blank=True
+    )
+
+    confirmation_code = models.CharField(
+        max_length=255,
+        null=True,
+        blank=False,
+        default='XXXXX'
     )
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['username', 'email'],
-                name='unique_name',
-            ),
-        ]
-        ordering = ('username',)
+        ordering = ('id',)
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+
+    def __str__(self):
+        return self.username
 
     @property
     def is_admin(self):
-        return self.role == ReviewUser.ADMIN_ROLE or self.is_superuser
+        return self.role == self.ADMIN or self.is_superuser
 
     @property
     def is_moderator(self):
-        return self.role == ReviewUser.MODERATOR_ROLE or self.is_staff
+        return self.role == self.MODERATOR
+
+    @property
+    def is_user(self):
+        return self.role == self.USER
