@@ -1,89 +1,68 @@
-[![API_yamdb deployy latest](https://github.com/goldenlion52rus/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg)](https://github.com/goldenlion52rus/yamdb_final/actions/workflows/yamdb_workflow.yml)
+# yamdb_final
 
-# Yamdb_final
+![status workflow](https://github.com/Angelina91/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg)
 
-Финальный проект 16 спринта YaP
+# Краткое описание проекта
+YaMDb_final - программный интерфейс для социальной сети.
+Он позволяет неравнодушным творческим людям обсудить заинтересовавшие их произведения: оставить отзывы к книгам, фильмам и т.д. и прокоментировать уже существующие отзывы
 
-## Описание
+## Документация
 
-Сервис Апи для того, чтобы собирать пользовательские оценки и комментарии на произведения различных категорий и жанров.
+[redoc](http://84.201.158.17/redoc/)
+## :dash: Установка и запуск проекта
 
-## Подробная документация по адресу YOURHOST/redoc/
+### :dancers: Клонирование репозитория
 
-В redoc описанны все ендпоинты и их возможности с примерами запросов. И ожидаемые ответы.
+git clone [SSH](git@github.com:Angelina91/yamdb_final.git)
 
-## Возможности
+### :whale: Запуск всех контейнеров
 
-- JWT Аутентификация
-- возможность ознакомиться с отзывами без аутентификации(но нельзя оставить отзыв и поставить оценку)
-- Получение списка всех категорий и жанров, добавление и удаление.
-- Пользователи могут самостоятельно зарегистрироваться через идентификацию по email
-- Есть возможность назначить администратора, модератора
+Из директории infra/ выполнить команду
 
-## Технологии
-
-- Django==3.2
-- django-filter==22.1
-- django-import-export==3.0.2
-- djangorestframework==3.12.4
-- djangorestframework-simplejwt==5.2.2
-- PyJWT==2.1.0
-
-со списком всех используемых библиотек можно ознакомиться в файлe requirements.txt
-
-## Инструкции по развертыванию проекта в dev режиме
-
-## Запуск проекта в dev-режиме
-
-```code
-git clone <название репозитория>
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python manage.py migrate
-Load test data in django admin panel
-python manage.py runserver
+```bash
+docker-compose up -d --build
 ```
 
-## Инструкции по развертыванию проекта в docker
+### :feet: Выполнить миграции
 
-- Установите Docker, используя инструкции с официального сайта.
-- Склонируйте репозиторий на локальную машину
-
-```code
-git clone git@github.com:goldenlion52rus/yamdb_final.git
+```bash
+docker-compose exec web python manage.py migrate
 ```
 
-- Создайте файл .env командой
+### :bowtie: Создать суперпользователя
 
-```code
-touch .env
+```bash
+docker-compose exec web python manage.py createsuperuser
 ```
 
-- Добавьте в него переменные окружения для работы с базой данных:
-- Запустите docker-compose командой
+### :crystal_ball: Собрать статику
 
-```code
-sudo docker-compose up -d
+```bash
+docker-compose exec web python manage.py collectstatic --no-input
 ```
 
-- Выполните миграции
+### :love_letter: Заполнить базу данных
 
-```code
-sudo docker-compose exec yamdb python manage.py migrate
+```bash
+docker-compose exec web python manage.py loaddata ../infra/fixtures.json
 ```
 
-- Соберите статику командой
+## :dizzy: Стек
 
-```code
-sudo docker-compose exec yamdb python manage.py collectstatic --no-input
+_Python,
+Rest Api,
+Docker,
+PostgreSQL,
+Redoc,
+Django,
+djangorestframework_
+
+## Путь до удаленного сервера
+
+```bash
+ssh angelina91@84.201.158.17
 ```
 
-- Создайте суперпользователя Django
+## Автор
 
-```code
-sudo docker-compose exec yamdb python manage.py createsuperuser --username admin --email 'admin@yamdb.com'
-```
-
-# Авторы
-Кирилл Ройманн
+[Angelina91](https://github.com/Angelina91)
