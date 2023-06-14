@@ -1,40 +1,46 @@
 from rest_framework import permissions
 
 
-class AdminOrReadOnly(permissions.BasePermission):
-    """Проверка прав администратора."""
-
-    message = 'Изменять контент может только администратор!'
-
+class IsAdminOnly(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        if request.user.is_authenticated:
-            return request.user.is_admin
-        return False
+        return (
+            request.user.is_authenticated
+            and (request.user.is_superuser or request.user.is_admin)
+        )
 
 
-class IsOwnerOrReadOnly(permissions.BasePermission):
-    """Кастомный пермишн, позволящий редактировать и удалять обьект.
+class IsAdminOrReadOnly(permissions.BasePermission):
+    """
+    Разрешает доступ к ресурсу если используется безопасный метод или если
+    пользователь аутентифицирован и является админом или
+    суперюзером.
+    """
+    def has_permission(self, request, view):
+        return (request.method in permissions.SAFE_METHODS
+                or (request.user.is_authenticated and (
+                    request.user.is_admin or request.user.is_superuser)))
 
-    только его автору, модератору или администратору.
+
+class IsAuthorModeratorAdminOrReadOnly(permissions.BasePermission):
+    """
+    1.Разрешает доступ к ресурсу если используется безопасный метод, или в
+    случае, когда пользователь аутентифицирован.
+    2.Разрешает доступ к объекту если используется безопасный
+    метод, или пользователь - это автор объекта -
+    модератор, админ или суперюзер.
     """
 
-    message = 'Пользователь не является автором поста'
-
     def has_object_permission(self, request, view, obj):
-        if request.method in ('PATCH', 'DELETE'):
-            if request.user.is_authenticated:
-                return (request.user.is_admin
-                        or request.user.is_moderator
-                        or obj.author == request.user)
-        return True
-
-
-class IsAdmin(permissions.BasePermission):
-    """Проверка прав администратора."""
-
-    message = 'Вы должны быть админом чтобы получить доступ.'
+        return (
+            request.method in permissions.SAFE_METHODS
+            or obj.author == request.user
+            or request.user.is_admin
+            or request.user.is_moderator
+            or request.user.is_superuser
+        )
 
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.is_admin
+        return (
+            request.method in permissions.SAFE_METHODS
+            or request.user.is_authenticated
+        )
