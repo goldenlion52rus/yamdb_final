@@ -1,80 +1,63 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.db import models
-from users.validators import validate_username_not_me
+
+ROLES = (('user', 'юзер'), ('moderator', 'модератор'), ('admin', 'админ'),)
+USER = 'user'
 
 
-class ReviewUser(AbstractUser):
-    """Кастомный User с распределенными правами по ролям"""
-    USERNAME_FIELD = 'username'
-    EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = ['email']
+def validate_username_me(username):
+    if username == 'me':
+        raise ValidationError('Нельзя использовать me')
 
-    USER_ROLE = 'user'
-    MODERATOR_ROLE = 'moderator'
-    ADMIN_ROLE = 'admin'
 
-    ROLE_CHOICES = (
-        (USER_ROLE, 'user'),
-        (MODERATOR_ROLE, 'moderator'),
-        (ADMIN_ROLE, 'admin'),
-    )
-
-    username = models.CharField(
+class CustomUser(AbstractUser):
+    username = models.TextField(
+        'username',
         max_length=150,
         unique=True,
-        validators=[validate_username_not_me],
-        verbose_name='Имя пользователя',
-        help_text='Как к Вам обращаться?'
+        blank=False,
+        null=False,
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+\Z',
+                message='Неверно введено имя'
+            ), validate_username_me]
     )
-
     email = models.EmailField(
-        max_length=254,
+        'email',
         unique=True,
-        verbose_name='адрес электронной почты',
-        help_text='Введите адрес электронной почты'
+        max_length=254,
+        blank=False,
+        null=False,
+    )
+    first_name = models.TextField(
+        'name',
+        blank=True,
+        max_length=150
+    )
+    last_name = models.TextField(
+        'last_name',
+        blank=True,
+        max_length=150
+    )
+    bio = models.TextField(
+        'Биография',
+        blank=True,
+        null=True,
+        max_length=1000
     )
     role = models.CharField(
-        choices=ROLE_CHOICES,
-        max_length=50,
-        default='user',
-        verbose_name='Роль пользователя',
-        help_text='Выберите из списка роль для пользователя'
+        choices=ROLES,
+        default=USER,
+        max_length=50
     )
-
-    bio = models.TextField(
-        max_length=250,
-        blank=True,
-        verbose_name='Роль пользователя',
-        help_text='Выберите из списка роль для пользователя'
-    )
-
-    first_name = models.CharField(
-        max_length=150,
-        blank=True,
-        verbose_name='Имя пользователя',
-        help_text='Введите имя пользователя'
-    )
-
-    last_name = models.CharField(
-        max_length=150,
-        blank=True,
-        verbose_name='Фамилия пользователя',
-        help_text='Введите Вашу фамилию'
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['username', 'email'],
-                name='unique_name',
-            ),
-        ]
-        ordering = ('username',)
-
-    @property
-    def is_admin(self):
-        return self.role == ReviewUser.ADMIN_ROLE or self.is_superuser
 
     @property
     def is_moderator(self):
-        return self.role == ReviewUser.MODERATOR_ROLE or self.is_staff
+        return self.role == 'moderator'
+
+    @property
+    def is_admin(self):
+        return self.role == 'admin' or self.is_superuser

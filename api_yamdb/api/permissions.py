@@ -1,25 +1,37 @@
+import logging
+
 from rest_framework import permissions
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename='program.log'
+)
+
+
+class IsAdminCustomUser(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if (
+            request.user.is_authenticated
+            and (request.user.is_admin)
+        ):
+            return True
+        return True
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
-    """
-    Или пользователь является админом,
-    или можно только посмотреть
-    """
+
     def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            return (
-                request.user.is_admin
-                or request.method in permissions.SAFE_METHODS
-            )
-        return request.method in permissions.SAFE_METHODS
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return (request.method == 'POST'
+                or request.method == 'DELETE'
+                or request.method == 'PATCH'
+                ) and (
+                    request.user.is_authenticated
+                    and request.user.is_admin)
 
 
-class IsReadOnlyAuthorAdminModeratorAuth(permissions.BasePermission):
-    """
-    Определение прав внесения изменений:
-    ReadOnly, Author, Admin, Moderator, Auth
-    """
+class IsAdminOrAuthorOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         return (
             request.method in permissions.SAFE_METHODS
@@ -27,19 +39,10 @@ class IsReadOnlyAuthorAdminModeratorAuth(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        if request.user.is_authenticated:
-            return (
-                obj.author == request.user
-                or request.user.is_admin
-                or request.user.is_moderator
-                or request.method in permissions.SAFE_METHODS
-            )
-        return request.method in permissions.SAFE_METHODS
+        if request.method in permissions.SAFE_METHODS:
+            return True
 
-
-class IsAdminAuth(permissions.BasePermission):
-    """Доступ к контенту только админу или аутентифицированным"""
-    def has_permission(self, request, view):
-        return (
-            request.user.is_authenticated and request.user.is_admin
-        )
+        return request.user.is_authenticated and (
+            request.user.is_admin
+            or request.user.is_moderator
+            or request.user == obj.author)

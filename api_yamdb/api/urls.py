@@ -1,25 +1,25 @@
+from api.views import (CategoryViewSet, CommentViewSet, GenreViewSet,
+                       ReviewViewSet, TitleViewSet)
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
+from users.views import UserViewSet, get_confirmation_code, get_token
 
-from .views import (CategoryViewSet, CommentViewSet, GenreViewSet,
-                    ReviewUserViewSet, ReviewViewSet, TitleViewSet,
-                    create_jwt_token, create_new_user)
-
-router = SimpleRouter()
-router.register(r'categories', CategoryViewSet)
-router.register(r'genres', GenreViewSet)
-router.register(r'titles', TitleViewSet)
-router.register(
-    r'titles/(?P<title_id>\d+)/reviews', ReviewViewSet, basename='review'
-)
-router.register(
+router_v1 = SimpleRouter()
+router_v1.register('categories', CategoryViewSet, basename='category')
+router_v1.register('genres', GenreViewSet, basename='genre')
+router_v1.register('titles', TitleViewSet, basename='title')
+router_v1.register(
     r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
-    CommentViewSet, basename='comment'
+    CommentViewSet, basename='comments'
 )
-router.register(r'users', ReviewUserViewSet, basename='users')
+router_v1.register(
+    r'titles/(?P<title_id>\d+)/reviews', ReviewViewSet, basename='viewsets'
+)
+router_v1.register('users', UserViewSet, basename='users')
 
 urlpatterns = [
-    path('v1/', include(router.urls)),
-    path('v1/auth/signup/', create_new_user),
-    path('v1/auth/token/', create_jwt_token),
+    path('v1/auth/signup/', get_confirmation_code, name='signup'),
+    path('v1/auth/token/', get_token, name='get_token'),
+    path('v1/auth/', include('django.contrib.auth.urls')),
+    path('v1/', include(router_v1.urls)),
 ]
