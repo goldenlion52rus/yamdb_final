@@ -1,19 +1,16 @@
 # yamdb_final
 
-![status workflow](https://github.com/Angelina91/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg)
+![status workflow](https://github.com/goldenlion52rus/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg)
 
 # Краткое описание проекта
 YaMDb_final - программный интерфейс для социальной сети.
 Он позволяет неравнодушным творческим людям обсудить заинтересовавшие их произведения: оставить отзывы к книгам, фильмам и т.д. и прокоментировать уже существующие отзывы
 
-## Документация
-
-[redoc](http://84.201.158.17/redoc/)
 ## :dash: Установка и запуск проекта
 
 ### :dancers: Клонирование репозитория
 
-git clone [SSH](git@github.com:Angelina91/yamdb_final.git)
+git clone [SSH](git@github.com:goldenlion52rus/yamdb_final.git)
 
 ### :whale: Запуск всех контейнеров
 
@@ -60,9 +57,9 @@ djangorestframework_
 ## Путь до удаленного сервера
 
 ```bash
-ssh angelina91@84.201.158.17
+ssh testbm@84.201.143.116
 ```
 
 ## Автор
 
-[Angelina91](https://github.com/Angelina91)
+Кирилл Ройманн (https://github.com/goldenlion52rus)
